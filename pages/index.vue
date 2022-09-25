@@ -3,76 +3,115 @@
     <button class="section -yellow" @click="handleApi1">await catch</button>
     <button class="section -blue" @click="handleApi2">async await</button>
     <button class="section -red" @click="handleApi3">then catch</button>
+    <button class="section -green" @click="handleApi4">Error handling</button>
+    <p class="error -red" v-if="errorText">{{ errorText }}</p>
+    <p class="succes -blue" v-if="response">{{ response }}</p>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent } from "@nuxtjs/composition-api";
-import axios from "axios";
+import { defineComponent, onMounted, ref } from '@nuxtjs/composition-api'
+import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
 
 export default defineComponent({
-  name: "index",
+  name: 'index',
   setup() {
+    const indexPath = 'http://localhost:8000/api/api'
+    const errorText = ref('')
+    const response = ref('')
 
-    //* 今回提唱したい書き方
+    //* ---------------------------------  1章  -----------------------------------------
+
+    //* 複数の非同期処理をハンドリングする場合や細かくエラーハンドリングを行いたい時など、、
     const handleApi1 = async () => {
-      const res = await axios.get("http://localhost:8000/api/api").catch(e => e)
+      const res: AxiosResponse = await axios.get(indexPath).catch((e) => e)
       if (res.status !== 200) {
-        console.error(res)
+        errorText.value = res.data
         return
       }
-      console.log(res)
-      const user = res.data
-      return user 
+      response.value = res.data
     }
 
-    //* 現在の会社内で主流な書き方
+    //* 流行らせたい書き方
     const handleApi2 = async () => {
       try {
-        const res = await axios.get("http://localhost:8000/api/api")
-        console.log(res)
+        const res = await axios.get(indexPath)
+        response.value = res.data
       } catch (err) {
-        console.error(err)
+        errorText.value = err as string
       }
     }
 
-    //* bat practice
+    // @note bat practice
     const handleApi3 = () => {
-        const myPromise = axios.get("http://localhost:8000/api/api").then(() => {
-
-          //*成功した時の処理
-
-          console.log('then')
-        }).catch((e) => {
-
-          //*失敗した時した時の処理
-
-          console.log('catch', e)
-        }).finally(() => {
-
-          //* どちらの処理の時も実行する
-
-          console.log('finally')
-        });
-        console.log(myPromise, 1)
-        // const res = await axios.get("http://localhost:8000/api/api")
-        // console.log(res.data, 2)
+      axios
+        .get(indexPath)
+        .then((res) => {
+          response.value = res.data
+        })
+        .catch((err) => {
+          errorText.value = err
+        })
+        .finally(() => {
+          // ローディングを終了させる処理など、
+        })
     }
+
+    //* ---------------------------------  2章  -----------------------------------------
+
+    // @note 全ての処理を同期的に取得するために
+    const handleApi4 = async () => {
+      try {
+        const res = await axios.get(indexPath)
+        await axios.get(indexPath)
+        await axios.get(indexPath)
+        await axios.get(indexPath)
+        response.value = res.data
+      } catch (err) {
+        errorText.value = err as string
+      }
+    }
+
+    // @note 全ての処理を待つ必要はない
+    const getFirstView = async () => {
+      //* 下記の条件で実行した場合はエラーが握り潰されている状態なので、エラーレスポンスを受け取ったとしても受け取ったことを知らせる方法はない
+      axios.get(indexPath)
+      const res2 = await axios.get(indexPath).catch((e) => e)
+
+      if (res2?.status !== 200) {
+        console.error('画像取得に失敗しました')
+      }
+
+      const res3 = await axios.get(indexPath).catch((e) => e)
+
+      if (res3?.status !== 200) {
+        console.error('ユーザー情報の取得に失敗しました')
+      }
+    }
+
+    onMounted(async () => {
+      await getFirstView()
+    })
+
+    //* ---------------------------------  3章  -----------------------------------------
     return {
       handleApi1,
       handleApi2,
-      handleApi3
-    };
+      handleApi3,
+      handleApi4,
+      errorText,
+      response,
+    }
   },
-});
+})
 </script>
 
 <style lang="scss" scoped>
 .container {
   position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 
   > .section {
     font-size: 30px;
@@ -90,6 +129,10 @@ export default defineComponent({
 
   > .-yellow {
     color: yellow;
+  }
+
+  > .-green {
+    color: green;
   }
 }
 </style>

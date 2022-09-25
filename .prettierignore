@@ -1,0 +1,7 @@
+.nuxt
+node_modules/
+dist
+.nuxt-storybook
+storybook-static
+docs/
+coverage
