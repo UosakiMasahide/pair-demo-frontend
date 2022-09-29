@@ -33,6 +33,17 @@ export default defineComponent({
 
     //* awaitと宣言すると結果を受け取るまで待ち続けてしまうので同期的な処理として扱わないといけないので順番を考える必要がある。
     // @note NG
+    const fetchIndex1 = async () => {
+      const res1 = await axios.get(path).catch((e) => e)
+      awaitText.value.text1 = res1.data.text1
+      const res2 = await axios.get(path).catch((e) => e)
+      awaitText.value.text2 = res2.data.text2
+      const res3 = await axios.get(path).catch((e) => e)
+      awaitText.value.text3 = res3.data.text3
+      const res4 = await axios.get(path).catch((e) => e)
+      awaitText.value.text4 = res4.data.text4
+    }
+    // @note NG
     const fetchIndex2 = async () => {
       const res1 = await axios.get(path).catch((e) => e)
       const res2 = await axios.get(path).catch((e) => e)
@@ -45,18 +56,45 @@ export default defineComponent({
     }
 
     // @note OK
-    const fetchIndex3 = async () => {
-      const res1 = await axios.get(path).catch((e) => e)
-      awaitText.value.text1 = res1.data.text1
-      const res2 = await axios.get(path).catch((e) => e)
-      awaitText.value.text2 = res2.data.text2
-      const res3 = await axios.get(path).catch((e) => e)
-      awaitText.value.text3 = res3.data.text3
-      const res4 = await axios.get(path).catch((e) => e)
-      awaitText.value.text4 = res4.data.text4
+    const fetchIndex3 = () => {
+      new Promise((resolve, reject) => {
+        setTimeout(() => {
+          awaitText.value.text1 = 'おはよう'
+          console.log('実行したよ1🐟')
+          resolve(1)
+        }, 3000)
+      })
+
+      new Promise((resolve, reject) => {
+        setTimeout(() => {
+          awaitText.value.text2 = 'こんにちは'
+          console.log('実行したよ2🔥')
+          resolve(1)
+        }, 3000)
+      })
+      new Promise((resolve, reject) => {
+        setTimeout(() => {
+          awaitText.value.text3 = 'こんばんは'
+          console.log('実行したよ3🟡')
+          resolve(1)
+        }, 3000)
+      })
+      new Promise((resolve, reject) => {
+        setTimeout(() => {
+          awaitText.value.text4 = 'さようなら'
+          console.log('実行したよ4🐵')
+          resolve(1)
+        }, 3000)
+      })
     }
 
-    onBeforeMount(async () => await fetchIndex3())
+    // const fetchIndex4 = () => {
+    //   Promise.all([]).then((values) => {
+    //     console.log(values, 'promise allの結果')
+    //   })
+    // }
+
+    onBeforeMount(() => fetchIndex3())
 
     return {
       awaitText,

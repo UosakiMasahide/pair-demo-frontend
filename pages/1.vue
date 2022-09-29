@@ -24,22 +24,23 @@ export default defineComponent({
     //* 複数の非同期処理をハンドリングする場合や細かくエラーハンドリングを行いたい時など、、
     const handleApi1 = async () => {
       const res = await axios.get(path).catch((e) => e)
-
-      if (axios.isAxiosError(res) && res?.response?.status !== 200) {
+      if (res?.response?.status !== 200) {
         errorText.value = 'handleApi1がエラーになりました。'
         return
       }
       response.value = res.data
     }
 
-    //* 流行らせたい書き方
+    //* 社内の主流として扱う書き方。
     const handleApi2 = async () => {
       try {
         const res = await axios.get(path)
-        response.value = res.data
+        const res2 = await axios.get(path)
+        const res3 = await axios.get(path)
+        // response.value = res.data
       } catch (err) {
-        if (axios.isAxiosError(err)) {
-          errorText.value = 'handleApi1がエラーになりました。'
+        if (axios.isAxiosError(err) && err?.response?.status !== 200) {
+          errorText.value = err.response?.data
         }
       }
     }

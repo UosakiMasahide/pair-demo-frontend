@@ -13,27 +13,68 @@ import axios, { AxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
 export default defineComponent({
   name: 'index',
   setup() {
-    const showPath = 'http://localhost:8000/api/index3'
+    const path = 'http://localhost:8000/api/index3'
     const errorText = ref('')
     const response = ref('')
 
     // @note エラー処理の比較
-    const errorList = async () => {
-      const res3 = await axios.get(showPath).catch((e) => e)
-      console.log(res3)
+    const fetchErrorList = async () => {
+      const res3 = await axios.get(path).catch((e) => e)
+      // console.log(res3)
 
       if (axios.isAxiosError(res3) && res3?.response?.status !== 200) {
-        const errorText = '取得に失敗しました。'
+        const error = '取得に失敗しました。'
         console.error(errorText)
         console.warn(errorText)
-        // errorText.value = errorText
-        // throw new Error('正しい値を引数にしてください')
+        console.log(errorText)
+        errorText.value = error
+        return
+      }
+
+      // if (axios.isAxiosError(res3) && res3?.response?.status === 422) {
+      //   throw new Error('正常にリクエストできませんでした')
+      // }
+
+      // if (axios.isAxiosError(res3) && res3?.response?.status === 401) {
+      //   throw new Error('認証に失敗しました。正しいパスワードを入れてください')
+      // }
+
+      // if (axios.isAxiosError(res3) && res3?.response?.status === 403) {
+      //   throw new Error('もう一度ログインしてからページを閲覧してください。')
+      // }
+
+      // if (axios.isAxiosError(res3) && res3?.response?.status === 404) {
+      //   throw new Error('アクセスしたページが存在しません。')
+      // }
+    }
+
+    const fetchApi = async () => {
+      try {
+        const response = await axios.get(path)
+        return response.data
+      } catch (error) {
+        if (
+          axios.isAxiosError(error) &&
+          error.response &&
+          error.response.status === 400
+        ) {
+          console.log('400 Error!!')
+        }
       }
     }
 
-    onBeforeMount(async () => {
-      await errorList()
-    })
+    onBeforeMount(async () => await fetchErrorList())
+    const fetchIndex2 = async () => {
+      try {
+        const res = await axios.get(path)
+        response.value = res.data
+      } catch (err) {
+        // if (axios.isAxiosError(err)) {
+        //   errorText.value = 'handleApi1がエラーになりました。'
+        // }
+        //* ここで何もしないとエラーが握り潰された状態になり、原因が
+      }
+    }
 
     return {
       errorText,
